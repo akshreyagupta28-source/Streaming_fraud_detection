@@ -1,105 +1,83 @@
-# Real-Time Algorithmic Fraud & Anomaly Detection in Streaming Data
+# PS-02: Real-Time Algorithmic Fraud & Anomaly Detection in Streaming Data
 
-## Project Overview
-
-This project is developed for PS-02: Real-Time Algorithmic Fraud & Anomaly Detection in Streaming Data.
-
-The system detects potentially fraudulent financial transactions using machine learning and simulates real-time transaction processing.
-
-The project uses the PaySim financial transaction dataset and applies feature engineering and machine learning models for fraud detection.
-
-## Problem Statement
-
-Financial transaction systems generate a large number of transactions continuously. Detecting fraudulent transactions quickly is challenging because fraud cases are rare and transaction patterns can change over time.
-
-This project aims to build a fraud detection pipeline that can process transaction data sequentially and generate a fraud prediction.
-
-## Objectives
-
-- Process financial transaction data.
-- Perform feature engineering.
-- Handle highly imbalanced fraud data.
-- Train multiple machine learning models.
-- Compare Logistic Regression, Random Forest and XGBoost.
-- Perform transaction-level fraud prediction.
-- Simulate streaming transaction processing.
-- Display fraud detection results through a dashboard.
-
-## Dataset
-
-The project uses the PaySim synthetic financial transaction dataset.
-
-The dataset contains information such as:
-
-- Transaction type
-- Transaction amount
-- Sender balance
-- Receiver balance
-- Transaction time step
-- Fraud label
-
-The raw and processed datasets are not included in this repository.
-
-## Machine Learning Models
-
-The following models were trained and evaluated:
-
-1. Logistic Regression
-2. Random Forest
-3. XGBoost
-
-The trained models are stored in the `models/` directory.
-
-## Feature Engineering
-
-Additional features were created from the original transaction data:
-
-- Balance change of sender
-- Balance change of receiver
-- Amount to original balance ratio
-- One-hot encoded transaction type
-
-## Streaming Detection
-
-The `streaming_engine.py` module simulates a transaction stream by processing transactions sequentially from the processed dataset.
-
-Each transaction is passed to the trained fraud detection model and produces:
-
-- Fraud probability
-- Fraud / Legitimate decision
+A machine learning pipeline to detect fraudulent financial transactions using the PaySim synthetic dataset. Three models — Logistic Regression, Random Forest, and XGBoost — are trained and compared, with results served through a Streamlit dashboard.
 
 ## Project Structure
 
-```text
-Streaming_fraud_detection/
-│
-├── dashboard/
-│   └── app.py
-│
+```
 ├── dataset/
-│   ├── raw/
-│   └── processed/
-│
-├── models/
-│   ├── logistic_regression.pkl
-│   ├── random_forest.pkl
-│   ├── scaler.pkl
-│   └── xgboost.pkl
-│
-├── notebook/
-│   ├── 01_dataset_inspection.ipynb
-│   └── 02_model_training.ipynb
-│
-├── result/
-│   ├── logistic_regression_confusion_matrix.png
-│   ├── random_forest_confusion_matrix.png
-│   └── xgboost_confusion_matrix.png
-│
-├── src/
-│   ├── fraud_detector.py
-│   └── streaming_engine.py
-│
-├── tests/
-│
-├── .gitignore
-└── README.md
+│   ├── raw/                  # original PaySim CSV
+│   └── processed/            # cleaned + feature-engineered dataset
+├── models/                   # saved model files (.pkl)
+├── result/                   # confusion matrix images
+├── dashboard/
+│   └── app.py                # Streamlit dashboard
+├── 01_dataset_inspection.ipynb
+└── 02_model_training.ipynb
+```
+
+## Dataset
+
+- Source: PaySim synthetic mobile money transaction log
+- ~6.36M raw transactions, 500,000 used for training/testing (chronological 80-20 split)
+- Fraud is heavily imbalanced: ~0.13% of transactions are fraudulent
+
+## Pipeline
+
+1. **Dataset inspection** — missing values, duplicates, class distribution
+2. **Feature engineering** — balance change features, amount-to-balance ratio, one-hot encoded transaction type
+3. **Model training** — Logistic Regression (scaled features), Random Forest, XGBoost (with `scale_pos_weight` for imbalance)
+4. **Evaluation** — Precision, Recall, F1, PR-AUC, ROC-AUC (accuracy is not a reliable metric here due to class imbalance)
+
+## Results
+
+| Model | Precision | Recall | F1 Score | PR-AUC | ROC-AUC | Accuracy |
+|---|---|---|---|---|---|---|
+| Logistic Regression | 0.027 | 0.750 | 0.053 | 0.501 | 0.973 | 99.25% |
+| Random Forest | 1.000 | 0.893 | 0.943 | 0.930 | 0.980 | 99.997% |
+| XGBoost | 0.511 | 0.821 | 0.630 | 0.831 | 0.973 | 99.97% |
+
+**Random Forest** performs best overall, with the highest F1 score and zero false positives on the test set.
+
+### Confusion Matrices
+
+**Logistic Regression**
+![Logistic Regression Confusion Matrix](result/logistic_regression_confusion_matrix.png)
+
+**Random Forest**
+![Random Forest Confusion Matrix](result/random_forest_confusion_matrix.png)
+
+**XGBoost**
+![XGBoost Confusion Matrix](result/xgboost_confusion_matrix.png)
+
+## Dashboard
+
+A Streamlit dashboard (`dashboard/app.py`) serves live predictions on the trained XGBoost model, with:
+- Fraud probability threshold control
+- Fraud/legitimate breakdown metrics
+- Highlighted transaction table
+- Confusion matrix view
+
+Run it with:
+
+```bash
+python -m streamlit run dashboard/app.py
+```
+
+## Tech Stack
+
+- Python, pandas, NumPy
+- scikit-learn, XGBoost
+- Streamlit
+- joblib
+
+## Notes
+
+- PaySim is a synthetic dataset with strongly separable fraud patterns, which explains the high accuracy/ROC-AUC scores. Precision, Recall, and F1 were prioritized during evaluation because of the severe class imbalance.
+- Model and processed dataset files are excluded from version control (see `.gitignore`) due to size.
+
+
+
+## author 
+- SHREYA GUPTA | CSE'28 | ASPIRING DATA SCIENTIST |
+  
